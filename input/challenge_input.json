@@ -1,0 +1,17 @@
+{
+  "challenge_info": {
+    "challenge_id": "my_challenge_001",
+    "test_case_name": "my_test_case",
+    "description": "Describe your challenge here"
+  },
+  "documents": [
+    {"filename": "yourfile1.pdf", "title": "Title for PDF 1"},
+    {"filename": "yourfile2.pdf", "title": "Title for PDF 2"}
+  ],
+  "persona": {
+    "role": "Your Persona"
+  },
+  "job_to_be_done": {
+    "task": "Describe the task to be done"
+  }
+}
