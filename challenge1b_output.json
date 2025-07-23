@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "challenge_id": "my_challenge_001",
+    "test_case_name": "my_test_case",
+    "documents": [
+      {"filename": "yourfile1.pdf", "title": "Title for PDF 1"},
+      {"filename": "yourfile2.pdf", "title": "Title for PDF 2"}
+    ],
+    "persona": {
+      "role": "Your Persona"
+    },
+    "job_to_be_done": {
+      "task": "Describe the task to be done"
+    },
+    "processing_timestamp": "2024-06-01T12:00:00"
+  },
+  "extracted_sections": [
+    {
+      "document": "yourfile1.pdf",
+      "page_number": 2,
+      "section_title": "Introduction to Topic",
+      "importance_rank": 1
+    },
+    {
+      "document": "yourfile2.pdf",
+      "page_number": 5,
+      "section_title": "Key Findings",
+      "importance_rank": 2
+    }
+  ],
+  "sub_section_analysis": [
+    {
+      "document": "yourfile1.pdf",
+      "refined_text": "This section covers the foundational concepts relevant to the persona's task.",
+      "page_number": 2
+    },
+    {
+      "document": "yourfile2.pdf",
+      "refined_text": "Summary of the most important findings for the job-to-be-done.",
+      "page_number": 5
+    }
+  ]
+} 
