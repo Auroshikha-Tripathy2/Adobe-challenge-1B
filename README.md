@@ -93,10 +93,21 @@ pipeline_tag: sentence-similarity
 - Once built, you can run the container **offline** as long as you do not change the model or dependencies.
 - For host (non-Docker) use, install dependencies and run once online to cache the model, then you can run offline.
 
+### Manual Model Download (Host Usage)
+If you want to manually download the NLP model for offline use on your host, you can get it from Hugging Face:
+
+- [sentence-transformers/all-MiniLM-L12-v2 on Hugging Face](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2)
+
+To download using the command line:
+```sh
+python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')"
+```
+This will download and cache the model locally for offline use.
+
 ---
 
 
-# all-MiniLM-L6-v2
+# all-MiniLM-L12-v2
 This is a [sentence-transformers](https://www.SBERT.net) model: It maps sentences & paragraphs to a 384 dimensional dense vector space and can be used for tasks like clustering or semantic search.
 
 ## Usage (Sentence-Transformers)
@@ -111,7 +122,7 @@ Then you can use the model like this:
 from sentence_transformers import SentenceTransformer
 sentences = ["This is an example sentence", "Each sentence is converted"]
 
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
 embeddings = model.encode(sentences)
 print(embeddings)
 ```
@@ -130,13 +141,12 @@ def mean_pooling(model_output, attention_mask):
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
     return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
-
 # Sentences we want sentence embeddings for
 sentences = ['This is an example sentence', 'Each sentence is converted']
 
 # Load model from HuggingFace Hub
-tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L12-v2')
+model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L12-v2')
 
 # Tokenize sentences
 encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
