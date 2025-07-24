@@ -1,17 +1,17 @@
 {
   "challenge_info": {
-    "challenge_id": "my_challenge_001",
-    "test_case_name": "my_test_case",
-    "description": "Describe your challenge here"
+    "challenge_id": "your_challenge_id_here",
+    "test_case_name": "your_test_case_name_here",
+    "description": "Describe your challenge or test case here."
   },
   "documents": [
     {"filename": "yourfile1.pdf", "title": "Title for PDF 1"},
     {"filename": "yourfile2.pdf", "title": "Title for PDF 2"}
   ],
   "persona": {
-    "role": "Your Persona"
+    "role": "Your Persona (e.g., Data Scientist, Student, etc.)"
   },
   "job_to_be_done": {
-    "task": "Describe the task to be done"
+    "task": "Describe the task to be done (e.g., Extract tables, summarize content, etc.)"
   }
 }

@@ -83,6 +83,12 @@ pipeline_tag: sentence-similarity
      docker run -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output adobe-challenge
      ```
 
+   **Universal Command (Recommended for PowerShell, Git Bash, Mac, and Linux):**
+   ```sh
+   docker run -v ${PWD}/input:/app/input -v ${PWD}/output:/app/output adobe-challenge
+   ```
+   > **Note:** `${PWD}` works in PowerShell, Git Bash, and Unix shells. If you get a path error, use your absolute path as described above.
+
 4. **Check the Output**
    - Results will be saved in your local `output` folder.
 
