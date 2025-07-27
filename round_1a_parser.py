@@ -1,77 +1,113 @@
-import pypdfium2 as pdfium  # Or your chosen PDF library
+import fitz  # PyMuPDF
 import json
+import re
+from collections import Counter
+
+def get_font_statistics(doc):
+    font_counts = Counter()
+    size_counts = Counter()
+    for page in doc:
+        blocks = page.get_text("dict")["blocks"]
+        for b in blocks:
+            if b['type'] == 0:
+                for l in b["lines"]:
+                    for s in l["spans"]:
+                        font_counts[s['font']] += 1
+                        size_counts[round(s['size'])] += 1
+    body_size = size_counts.most_common(1)[0][0] if size_counts else 12
+    potential_heading_sizes = sorted([size for size in size_counts if size > body_size], reverse=True)
+    heading_levels = {}
+    if len(potential_heading_sizes) > 0:
+        heading_levels[potential_heading_sizes[0]] = "H1"
+    if len(potential_heading_sizes) > 1:
+        heading_levels[potential_heading_sizes[1]] = "H2"
+    if len(potential_heading_sizes) > 2:
+        heading_levels[potential_heading_sizes[2]] = "H3"
+    return body_size, heading_levels
+
+def is_bold(font_name):
+    return any(x in font_name.lower() for x in ['bold', 'black', 'heavy'])
 
 def extract_outline_and_text(pdf_path):
     """
     Extracts structured outline (Title, H1, H2, H3 with page numbers)
-    and associated text content from a PDF.
-
-    This is your refined Round 1A solution.
-
-    Args:
-        pdf_path (str): Path to the PDF file.
-
-    Returns:
-        dict: A dictionary containing 'title' and 'outline'.
-              Each outline entry should also include the 'content_text'
-              for that section/subsection.
-              Example:
-              {
-                  "title": "Document Title",
-                  "outline": [
-                      {"level": "H1", "text": "Section 1", "page": 1, "content_text": "Content of section 1..."},
-                      {"level": "H2", "text": "Subsection 1.1", "page": 1, "content_text": "Content of subsection 1.1..."},
-                      ...
-                  ]
-              }
+    and associated text content from a PDF using PyMuPDF (fitz).
+    Returns a dict with 'title' and 'outline' (list of sections).
+    Each section: {'level', 'text', 'page', 'content_text'}
     """
-    # Placeholder for your Round 1A logic
-    # You'll need to parse the PDF, identify headings (using font size, position, etc.)
-    # and then extract the text that falls under each heading until the next heading.
-
-    # Example using pypdfium2 (you'll need more sophisticated logic for real headings)
     outline = []
-    title = "Extracted Document Title" # Replace with actual title extraction
-
+    title = "Extracted Document Title"
     try:
-        doc = pdfium.PdfDocument(pdf_path)
-        for i in range(len(doc)):
-            page = doc[i]
-            text_page = page.get_textpage()
-            text = text_page.get_text_range()
-
-            # Simple placeholder: Treat each page as a potential "section" for now.
-            # You NEED to replace this with your actual heading detection from Round 1A.
-            # This should identify H1, H2, H3 and their associated content.
-            outline.append({
-                "level": "H1", # This needs to be dynamically determined by your R1A logic
-                "text": f"Page {i+1}", # This needs to be the actual heading text
-                "page": i + 1,
-                "content_text": text
-            })
+        doc = fitz.open(pdf_path)
+        if doc.page_count == 0:
+            return {"title": "", "outline": []}
+        body_size, heading_levels = get_font_statistics(doc)
+        potential_title = ""
+        max_title_size = 0
+        current_heading = {"text": "", "level": None, "page": 0, "content_text": ""}
+        def commit_current_heading():
+            if current_heading["text"]:
+                clean_text = re.sub(r'^\d+(\.\d+)*\s*', '', current_heading["text"]).strip()
+                outline.append({
+                    "level": current_heading["level"],
+                    "text": clean_text,
+                    "page": current_heading["page"] + 1,  # 0-indexed to 1-indexed
+                    "content_text": current_heading["content_text"]
+                })
+                current_heading["text"] = ""
+                current_heading["level"] = None
+                current_heading["content_text"] = ""
+        for page_num, page in enumerate(doc, 0):
+            blocks = page.get_text("dict")["blocks"]
+            for b in blocks:
+                if b['type'] == 0:
+                    for l in b["lines"]:
+                        if len(l['spans']) == 0 or len(l['spans'][0]['text'].strip()) < 3:
+                            continue
+                        span = l['spans'][0]
+                        text = span['text'].strip()
+                        size = round(span['size'])
+                        font = span['font']
+                        if page_num <= 1 and size > max_title_size:
+                            max_title_size = size
+                            potential_title = text
+                        level = heading_levels.get(size)
+                        if level and (is_bold(font) or size > body_size + 2):
+                            commit_current_heading()
+                            current_heading["text"] = text
+                            current_heading["level"] = level
+                            current_heading["page"] = page_num
+                            current_heading["content_text"] = page.get_text()
+                        elif level and current_heading["level"] == level:
+                            current_heading["text"] += " " + text
+                        else:
+                            commit_current_heading()
+            # Commit any heading at the end of the page
+            commit_current_heading()
+        if not outline:
+            # Fallback: treat each page as a section with first non-empty line
+            for i, page in enumerate(doc):
+                page_text = page.get_text()
+                lines = [line.strip() for line in page_text.split('\n') if line.strip()]
+                first_line = lines[0] if lines else "Untitled Page"
+                outline.append({
+                    "level": "H1",
+                    "text": first_line,
+                    "page": i + 1,
+                    "content_text": page_text
+                })
+        title = potential_title or title
     except Exception as e:
         print(f"Error processing {pdf_path}: {e}")
-        # Return empty or partially filled data on error
         return {"title": "Unknown Title", "outline": []}
-
     return {"title": title, "outline": outline}
 
 if __name__ == '__main__':
-    # Example usage for testing
     sample_pdf_path = "sample.pdf" # Make sure you have a sample.pdf for testing
-    # You might want to copy a sample PDF into the /app/input directory for Docker testing
-    # For local testing, ensure sample.pdf is in the same directory or adjust path.
-    # Replace this with a path to a real PDF file for actual testing.
-
-    # Dummy PDF for local testing if no actual PDF is available
-    # You'll need to create a dummy.pdf for testing the parser locally without a real PDF.
-    # For example, using a simple text file and converting it or just a placeholder.
-    # In a real scenario, you'd use a proper PDF file provided by the challenge.
     try:
         with open("sample.pdf", "w") as f:
             f.write("This is a dummy PDF file content.\nSection 1.\nSubsection 1.1.\nPage 2 content.")
     except Exception:
-        pass # Ignore if file already exists or cannot be created
-
+        pass
     result = extract_outline_and_text("sample.pdf")
-    print(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2)) 

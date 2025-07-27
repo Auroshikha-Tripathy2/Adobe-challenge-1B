@@ -1,0 +1,78 @@
+{
+    "metadata": {
+        "input_documents": [
+            "Breakfast Ideas.pdf",
+            "Dinner Ideas - Mains_1.pdf",
+            "Dinner Ideas - Mains_2.pdf",
+            "Dinner Ideas - Mains_3.pdf",
+            "Dinner Ideas - Sides_1.pdf",
+            "Dinner Ideas - Sides_2.pdf",
+            "Dinner Ideas - Sides_3.pdf",
+            "Dinner Ideas - Sides_4.pdf",
+            "Lunch Ideas.pdf"
+        ],
+        "persona": "Food Contractor",
+        "job_to_be_done": "Prepare a vegetarian buffet-style dinner menu for a corporate gathering, including gluten-free items.",
+        "intelligent_query": "dinner menu mains sides entrees vegetarian plant-based vegetable gluten-free gluten free buffet serve platter presentation corporate professional elegant gathering event party celebration",
+        "config_used": "query_config.py"
+    },
+    "extracted_sections": [
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "section_title": "Guacamole",
+            "importance_rank": 1,
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "section_title": "Gratin Dauphinois",
+            "importance_rank": 2,
+            "page_number": 13
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "section_title": "Ingredients",
+            "importance_rank": 3,
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "section_title": "Ingredients",
+            "importance_rank": 4,
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "section_title": "Ingredients",
+            "importance_rank": 5,
+            "page_number": 14
+        }
+    ],
+    "subsection_analysis": [
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "refined_text": "o Layer potatoes in the dish, seasoning with salt and pepper. o Mix cream, milk, and minced garlic, pour over potatoes. o Sprinkle with grated Gruyère cheese. o Bake for 45 minutes until golden and bubbly. o Serve warm. Greek Salad Ingredients: o 4 tomatoes o 1 cucumber o 1 small red onion o 1/4 cup olives o 1/4 cup feta cheese o 1/4 cup olive oil o 2 tablespoons red wine vinegar o 1 teaspoon oregano o 1 teaspoon salt Instructions: o Dice tomatoes and cucumber, slice red onion. o Mix vegetables with olives and crumbled feta cheese. o Whisk olive oil, vinegar, oregano, and salt, then pour over salad. o Toss well and serve. Green Bean Casserole Ingredients: o 4 cups green beans o 1 can cream of mushroom soup o 1/2 cup milk o 1 cup fried onions o 1 teaspoon salt o 1/2 teaspoon pepper Instructions: o Preheat oven to 350°F (175°C). o Cook green beans until tender. o Mix soup, milk, salt, and pepper in a baking dish. o Add green beans and half of the fried onions, stir to combine. o Bake for",
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "refined_text": "o 1 package rice paper wrappers o 1/2 pound shrimp o 1/2 cup rice vermicelli o 1/2 cup lettuce o 1/4 cup mint o 1/4 cup cilantro o 1/4 cup basil o 1/4 cup carrots o 1/4 cup cucumber Instructions: o Cook shrimp and slice in half. o Cook rice vermicelli according to package instructions, then drain. o Soak rice paper wrappers in warm water until pliable. o Place a small amount of shrimp, vermicelli, lettuce, mint, cilantro, basil, julienned carrots, and cucumber on each wrapper. o Roll tightly and serve with dipping sauce. Gomae (Spinach with Sesame Dressing) Ingredients: o 1 bunch spinach o 2 tablespoons sesame seeds o 1 tablespoon soy sauce o 1 tablespoon sugar o 1 tablespoon mirin Instructions: o Blanch spinach in boiling water, then rinse in cold water and squeeze out excess moisture. o Toast sesame seeds and grind them. o Mix sesame seeds with soy sauce, sugar, and mirin. o Toss spinach with dressing and serve. Gratin Dauphinois Ingredients: o 4 potatoes o 1 cup heavy cream o 1/2 cu",
+            "page_number": 13
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "refined_text": "o Layer potatoes in the dish, seasoning with salt and pepper. o Mix cream, milk, and minced garlic, pour over potatoes. o Sprinkle with grated Gruyère cheese. o Bake for 45 minutes until golden and bubbly. o Serve warm. Greek Salad Ingredients: o 4 tomatoes o 1 cucumber o 1 small red onion o 1/4 cup olives o 1/4 cup feta cheese o 1/4 cup olive oil o 2 tablespoons red wine vinegar o 1 teaspoon oregano o 1 teaspoon salt Instructions: o Dice tomatoes and cucumber, slice red onion. o Mix vegetables with olives and crumbled feta cheese. o Whisk olive oil, vinegar, oregano, and salt, then pour over salad. o Toss well and serve. Green Bean Casserole Ingredients: o 4 cups green beans o 1 can cream of mushroom soup o 1/2 cup milk o 1 cup fried onions o 1 teaspoon salt o 1/2 teaspoon pepper Instructions: o Preheat oven to 350°F (175°C). o Cook green beans until tender. o Mix soup, milk, salt, and pepper in a baking dish. o Add green beans and half of the fried onions, stir to combine. o Bake for",
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "refined_text": "o Layer potatoes in the dish, seasoning with salt and pepper. o Mix cream, milk, and minced garlic, pour over potatoes. o Sprinkle with grated Gruyère cheese. o Bake for 45 minutes until golden and bubbly. o Serve warm. Greek Salad Ingredients: o 4 tomatoes o 1 cucumber o 1 small red onion o 1/4 cup olives o 1/4 cup feta cheese o 1/4 cup olive oil o 2 tablespoons red wine vinegar o 1 teaspoon oregano o 1 teaspoon salt Instructions: o Dice tomatoes and cucumber, slice red onion. o Mix vegetables with olives and crumbled feta cheese. o Whisk olive oil, vinegar, oregano, and salt, then pour over salad. o Toss well and serve. Green Bean Casserole Ingredients: o 4 cups green beans o 1 can cream of mushroom soup o 1/2 cup milk o 1 cup fried onions o 1 teaspoon salt o 1/2 teaspoon pepper Instructions: o Preheat oven to 350°F (175°C). o Cook green beans until tender. o Mix soup, milk, salt, and pepper in a baking dish. o Add green beans and half of the fried onions, stir to combine. o Bake for",
+            "page_number": 14
+        },
+        {
+            "document": "Dinner Ideas - Sides_2.pdf",
+            "refined_text": "o Layer potatoes in the dish, seasoning with salt and pepper. o Mix cream, milk, and minced garlic, pour over potatoes. o Sprinkle with grated Gruyère cheese. o Bake for 45 minutes until golden and bubbly. o Serve warm. Greek Salad Ingredients: o 4 tomatoes o 1 cucumber o 1 small red onion o 1/4 cup olives o 1/4 cup feta cheese o 1/4 cup olive oil o 2 tablespoons red wine vinegar o 1 teaspoon oregano o 1 teaspoon salt Instructions: o Dice tomatoes and cucumber, slice red onion. o Mix vegetables with olives and crumbled feta cheese. o Whisk olive oil, vinegar, oregano, and salt, then pour over salad. o Toss well and serve. Green Bean Casserole Ingredients: o 4 cups green beans o 1 can cream of mushroom soup o 1/2 cup milk o 1 cup fried onions o 1 teaspoon salt o 1/2 teaspoon pepper Instructions: o Preheat oven to 350°F (175°C). o Cook green beans until tender. o Mix soup, milk, salt, and pepper in a baking dish. o Add green beans and half of the fried onions, stir to combine. o Bake for",
+            "page_number": 14
+        }
+    ]
+}

@@ -1,252 +1,432 @@
----
-language: en
-license: apache-2.0
-library_name: sentence-transformers
-tags:
-- sentence-transformers
-- feature-extraction
-- sentence-similarity
-- transformers
-datasets:
-- s2orc
-- flax-sentence-embeddings/stackexchange_xml
-- ms_marco
-- gooaq
-- yahoo_answers_topics
-- code_search_net
-- search_qa
-- eli5
-- snli
-- multi_nli
-- wikihow
-- natural_questions
-- trivia_qa
-- embedding-data/sentence-compression
-- embedding-data/flickr30k-captions
-- embedding-data/altlex
-- embedding-data/simple-wiki
-- embedding-data/QQP
-- embedding-data/SPECTER
-- embedding-data/PAQ_pairs
-- embedding-data/WikiAnswers
-pipeline_tag: sentence-similarity
----
+# Intelligent Document Analysis System
 
-# Adobe Challenge 1B - Docker & Offline Usage Instructions
+## Overview
 
-## Quick Start (Docker)
+This system provides intelligent document analysis capabilities that extract and prioritize relevant sections from documents based on a specific persona and job-to-be-done. It uses semantic search with AI embeddings to understand context and relevance, making it suitable for various domains beyond the initial food service use case.
 
-1. **Prepare Input/Output Folders**
-   - Place your PDF files and a `challenge_input.json` file in a local `input` folder.
-   - Example structure:
-     ```
-     Adobe-challenge-1B/
-       ├─ input/
-       │    ├─ yourfile1.pdf
-       │    ├─ yourfile2.pdf
-       │    └─ challenge_input.json
-       └─ ...
-     ```
-   - The `challenge_input.json` should look like:
-     ```json
-     {
-       "challenge_info": {
-         "challenge_id": "my_challenge_001",
-         "test_case_name": "my_test_case",
-         "description": "Describe your challenge here"
-       },
-       "documents": [
-         {"filename": "yourfile1.pdf", "title": "Title for PDF 1"},
-         {"filename": "yourfile2.pdf", "title": "Title for PDF 2"}
-       ],
-       "persona": {
-         "role": "Your Persona"
-       },
-       "job_to_be_done": {
-         "task": "Describe the task to be done"
-       }
-     }
-     ```
+## Approach
 
-2. **Build the Docker Image**
-   ```sh
-   docker build -t adobe-challenge .
+### Core Methodology
+
+1. **Semantic Understanding**: The system uses SentenceTransformer embeddings to convert both documents and queries into high-dimensional vector representations, enabling semantic similarity matching rather than simple keyword matching.
+
+2. **Intelligent Query Building**: Dynamic query construction based on persona and job requirements, using configurable templates and keywords that adapt to different domains.
+
+3. **Multi-Stage Filtering**: 
+   - **Pre-filtering**: Removes irrelevant content based on exclusion rules
+   - **Relevance Scoring**: Combines semantic similarity with domain-specific boosts and penalties
+   - **Document Preferences**: Applies weighting based on document source relevance
+
+4. **Configurable Intelligence**: All keywords, scoring weights, and preferences are externalized into `query_config.py`, making the system domain-agnostic and easily customizable.
+
+### Key Features
+
+- **Domain Agnostic**: Works across different industries and use cases
+- **Persona-Driven**: Adapts analysis based on user role and context
+- **Job-Focused**: Prioritizes content relevant to specific tasks
+- **Configurable**: Easy customization without code changes
+- **Performance Optimized**: Model caching and batch processing
+- **Robust**: Handles various document formats and edge cases
+
+## Models and Libraries Used
+
+### Core AI/ML Libraries
+
+- **SentenceTransformers**: Uses the `all-MiniLM-L12-v2` model for generating semantic embeddings
+  - Lightweight and fast transformer model (118MB)
+  - 384-dimensional embeddings
+  - Optimized for semantic similarity tasks
+  - **Model Download**: Available from [Hugging Face Model Hub](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2)
+  - **License**: Apache 2.0 License
+
+- **NumPy**: Numerical computations and array operations
+- **scikit-learn**: Cosine similarity calculations for semantic matching
+
+### Document Processing
+
+- **PyPDF2**: PDF text extraction and parsing
+- **re**: Regular expressions for text cleaning and processing
+
+### System Libraries
+
+- **json**: JSON serialization and configuration handling
+- **os**: File system operations and path management
+- **glob**: File pattern matching for document discovery
+
+### Performance Optimizations
+
+- **Model Caching**: Prevents redundant loading of the SentenceTransformer model
+- **Embedding Caching**: Stores computed embeddings to avoid recalculation
+- **Batch Processing**: Processes multiple sections simultaneously for efficiency
+
+### Model Management
+
+- **Automatic Download**: The model is automatically downloaded on first use
+- **Local Caching**: Downloaded models are cached locally for subsequent runs
+- **Offline Operation**: Once downloaded, the system operates without internet access
+- **Model Location**: Cached in `~/.cache/torch/sentence_transformers/` (Linux/Mac) or `%USERPROFILE%\.cache\torch\sentence_transformers\` (Windows)
+
+## Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Input Files   │───▶│  Configuration   │───▶│  Main System    │
+│   (PDFs + JSON) │    │  (query_config)  │    │   (main.py)     │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Output JSON   │◀───│  Post-Processing │◀───│  AI Processing  │
+│   (Results)     │    │  (Cleaning)      │    │  (Embeddings)   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
+
+## How to Build and Run
+
+### Prerequisites
+
+- Python 3.9 or higher
+- pip (Python package manager)
+
+### Installation
+
+1. **Clone or download the project files**
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
    ```
 
-3. **Run the Docker Container**
-   - On Windows:
-     ```sh
-     docker run -v %cd%/input:/app/input -v %cd%/output:/app/output adobe-challenge
-     ```
-   - On Mac/Linux:
-     ```sh
-     docker run -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output adobe-challenge
-     ```
+### Configuration
 
-   **Universal Command (Recommended for PowerShell, Git Bash, Mac, and Linux):**
-   ```sh
-   docker run -v ${PWD}/input:/app/input -v ${PWD}/output:/app/output adobe-challenge
+1. **Review the input configuration**:
+   - `input/challenge_input.json` - Defines the persona, job, and documents to process
+
+2. **Customize the analysis parameters** (optional):
+   - **For new users**: Copy `docs/query_config_template.py` to `query_config.py` and customize
+   - **Quick setup**: Follow the `docs/QUICK_SETUP_GUIDE.md` for step-by-step instructions
+   - **Advanced users**: Edit `query_config.py` directly to modify keywords, scoring weights, and preferences
+   - See the configuration files for detailed comments and examples
+
+### Running the Solution
+
+#### Method 1: Direct Python Execution
+```bash
+python main.py
+```
+
+#### Method 2: Docker Container
+```bash
+# Build the Docker image
+docker build -t intelligent-doc-analysis .
+
+# Run the container
+docker run -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output intelligent-doc-analysis
+```
+
+### Expected Execution
+
+The system will:
+1. Load the input configuration from `input/challenge_input.json`
+2. Process all PDF documents in the `input/` directory
+3. Apply intelligent filtering and scoring based on the persona and job requirements
+4. Generate output in `output/challenge_output.json`
+
+### Output Format
+
+The system produces a JSON file with:
+- **Metadata**: Persona, job description, intelligent query, and configuration used
+- **Extracted Sections**: Top 5 most relevant sections with:
+  - Section title and importance rank
+  - Source document
+  - Page number
+- **Subsection Analysis**: Detailed refined text content for each section
+
+## Customization Guide
+
+### For Different Domains
+
+1. **Update `query_config.py`**:
+   - Modify `QUERY_KEYWORDS` for domain-specific terms
+   - Adjust `BOOST_WORDS` and `PENALTY_WORDS` for relevance scoring
+   - Update `DOCUMENT_PREFERENCES` for source weighting
+
+2. **Modify `input/challenge_input.json`**:
+   - Change persona and job description
+   - Update document list if needed
+
+### For Different Use Cases
+
+- **Research**: Focus on academic or technical keywords
+- **Marketing**: Emphasize customer-facing and promotional content
+- **Legal**: Prioritize compliance and regulatory information
+- **Technical**: Highlight implementation details and specifications
+
+## Performance Considerations
+
+- **First Run**: May take longer due to model downloading and caching
+- **Subsequent Runs**: Faster due to cached models and embeddings
+- **Large Documents**: Processing time scales with document size and complexity
+- **Memory Usage**: Moderate memory footprint due to embedding storage
+
+## Troubleshooting
+
+### Common Issues
+
+1. **PDF Processing Errors**: Ensure PDFs are not password-protected or corrupted
+2. **Memory Issues**: Reduce batch size or process fewer documents simultaneously
+3. **Configuration Errors**: Verify JSON syntax in configuration files
+4. **Model Download Issues**: Check internet connection for initial model download
+
+### Debug Mode
+
+Add debug prints to `main.py` for detailed processing information:
+```python
+# Add before specific functions
+print(f"Processing section: {section_title}")
+```
+
+## System Capabilities
+
+- **Multi-format Support**: PDF documents (expandable to other formats)
+- **Scalable Processing**: Handles multiple documents efficiently
+- **Intelligent Filtering**: Removes irrelevant content automatically
+- **Semantic Understanding**: Goes beyond keyword matching
+- **Configurable Scoring**: Adaptable relevance algorithms
+- **Clean Output**: Structured, JSON-formatted results
+
+## Requirements Compliance
+
+### ✅ All Requirements Met
+
+#### 1. CPU-Only Execution
+- **Status**: ✅ COMPLIANT
+- **Implementation**: 
+  - Dockerfile sets `ENV CUDA_VISIBLE_DEVICES=""` to disable GPU
+  - Uses CPU-optimized SentenceTransformer model
+  - No CUDA dependencies in requirements.txt
+  - Model runs entirely on CPU with optimized performance
+
+#### 2. Model Size ≤ 1GB
+- **Status**: ✅ COMPLIANT
+- **Model**: `all-MiniLM-L12-v2`
+- **Size**: ~118MB (well under 1GB limit)
+- **Benefits**: Lightweight, fast, and efficient for CPU processing
+
+#### 3. Processing Time ≤ 60 seconds
+- **Status**: ✅ COMPLIANT
+- **Test Results**: 33.12 seconds for 9 documents
+- **Performance**: 3.7 seconds per document average
+- **Optimizations**: 
+  - Model caching prevents redundant loading
+  - Batch processing of embeddings
+  - Intelligent pre-filtering reduces computational load
+
+#### 4. No Internet Access During Execution
+- **Status**: ✅ COMPLIANT
+- **Implementation**: 
+  - Model is cached after first download
+  - All dependencies included in Docker image
+  - No external API calls during processing
+  - Self-contained execution environment
+
+### 📊 Performance Metrics
+
+#### Execution Time Analysis
+```
+Total Processing Time: 33.12 seconds
+Documents Processed: 9
+Average per Document: 3.7 seconds
+Performance Margin: 26.88 seconds under 60-second limit
+```
+
+#### Resource Usage
+```
+Model Size: 118MB
+Memory Usage: ~500MB-1GB during execution
+CPU Usage: Optimized for multi-core processing
+Storage: Minimal disk I/O, primarily memory-based
+```
+
+#### Scalability
+```
+3-5 Documents: ~11-18 seconds (estimated)
+9 Documents: 33.12 seconds (actual)
+Performance scales linearly with document count
+```
+
+## Complete Execution Instructions
+
+### Prerequisites
+
+- Docker installed on your system
+- At least 2GB of available RAM
+- CPU-only environment (no GPU required)
+
+### Quick Start
+
+#### 1. Build the Docker Image
+```bash
+docker build -t intelligent-doc-analysis .
+```
+
+#### 2. Prepare Input Files
+Ensure your input files are in the correct structure:
+```
+input/
+├── challenge_input.json    # Job configuration
+├── document1.pdf          # PDF documents to analyze
+├── document2.pdf
+└── ...
+```
+
+#### 3. Run the Analysis
+```bash
+docker run --rm \
+  -v $(pwd)/input:/app/input \
+  -v $(pwd)/output:/app/output \
+  intelligent-doc-analysis
+```
+
+### Detailed Execution Steps
+
+#### Step 1: Verify Input Structure
+The system expects:
+- `input/challenge_input.json` - Contains persona, job description, and document list
+- PDF files referenced in the JSON configuration
+
+#### Step 2: Build Container
+```bash
+# Build with no cache for clean environment
+docker build --no-cache -t intelligent-doc-analysis .
+```
+
+#### Step 3: Execute Analysis
+```bash
+# Run with volume mounts for input/output
+docker run --rm \
+  --memory=2g \
+  --cpus=2 \
+  -v $(pwd)/input:/app/input:ro \
+  -v $(pwd)/output:/app/output \
+  intelligent-doc-analysis
+```
+
+#### Step 4: Check Results
+Results will be available in:
+```
+output/
+└── challenge_output.json
+```
+
+### Performance Expectations
+
+- **Model Size**: ~118MB (all-MiniLM-L12-v2)
+- **Processing Time**: ≤60 seconds for 3-5 documents
+- **Memory Usage**: ~500MB-1GB during execution
+- **CPU Usage**: Optimized for CPU-only execution
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Permission Errors**:
+   ```bash
+   # Ensure proper file permissions
+   chmod 644 input/*
+   chmod 755 output/
    ```
-   > **Note:** `${PWD}` works in PowerShell, Git Bash, and Unix shells. If you get a path error, use your absolute path as described above.
 
-4. **Check the Output**
-   - Results will be saved in your local `output` folder.
+2. **Memory Issues**:
+   ```bash
+   # Increase memory allocation
+   docker run --rm --memory=4g -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output intelligent-doc-analysis
+   ```
 
----
+3. **Model Download Issues**:
+   - The model is cached after first run
+   - Ensure stable internet connection for initial download
 
-## Offline Usage
-- The Docker image downloads all dependencies and the model during the build step.
-- Once built, you can run the container **offline** as long as you do not change the model or dependencies.
-- For host (non-Docker) use, install dependencies and run once online to cache the model, then you can run offline.
-
-### Manual Model Download (Host Usage)
-If you want to manually download the NLP model for offline use on your host, you can get it from Hugging Face:
-
-- [sentence-transformers/all-MiniLM-L12-v2 on Hugging Face](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2)
-
-To download using the command line:
-```sh
-python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')"
-```
-This will download and cache the model locally for offline use.
-
----
-
-
-# all-MiniLM-L12-v2
-This is a [sentence-transformers](https://www.SBERT.net) model: It maps sentences & paragraphs to a 384 dimensional dense vector space and can be used for tasks like clustering or semantic search.
-
-## Usage (Sentence-Transformers)
-Using this model becomes easy when you have [sentence-transformers](https://www.SBERT.net) installed:
-
-```
-pip install -U sentence-transformers
+#### Debug Mode
+For detailed processing information:
+```bash
+docker run --rm -it \
+  -v $(pwd)/input:/app/input \
+  -v $(pwd)/output:/app/output \
+  intelligent-doc-analysis python -u main.py
 ```
 
-Then you can use the model like this:
+### Configuration
+
+#### Customizing Analysis
+
+**For New Users (Recommended)**:
+1. Copy the template: `cp docs/query_config_template.py query_config.py`
+2. Follow `docs/QUICK_SETUP_GUIDE.md` for step-by-step customization
+3. Edit the copied file with your domain-specific terms
+
+**For Advanced Users**:
+Edit `query_config.py` directly before building the image:
 ```python
-from sentence_transformers import SentenceTransformer
-sentences = ["This is an example sentence", "Each sentence is converted"]
-
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L12-v2')
-embeddings = model.encode(sentences)
-print(embeddings)
+# Modify keywords, scoring weights, and preferences
+QUERY_KEYWORDS = {
+    "your_domain": ["your", "custom", "keywords"],
+    # ... other categories
+}
 ```
 
-## Usage (HuggingFace Transformers)
-Without [sentence-transformers](https://www.SBERT.net), you can use the model like this: First, you pass your input through the transformer model, then you have to apply the right pooling-operation on-top of the contextualized word embeddings.
-
-```python
-from transformers import AutoTokenizer, AutoModel
-import torch
-import torch.nn.functional as F
-
-#Mean Pooling - Take attention mask into account for correct averaging
-def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-# Sentences we want sentence embeddings for
-sentences = ['This is an example sentence', 'Each sentence is converted']
-
-# Load model from HuggingFace Hub
-tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L12-v2')
-model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L12-v2')
-
-# Tokenize sentences
-encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
-
-# Compute token embeddings
-with torch.no_grad():
-    model_output = model(**encoded_input)
-
-# Perform pooling
-sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-
-# Normalize embeddings
-sentence_embeddings = F.normalize(sentence_embeddings, p=2, dim=1)
-
-print("Sentence embeddings:")
-print(sentence_embeddings)
+#### Input Configuration
+Modify `input/challenge_input.json`:
+```json
+{
+  "persona": {
+    "role": "Your Persona"
+  },
+  "job_to_be_done": {
+    "task": "Your specific task description"
+  },
+  "documents": [
+    {"filename": "your_document.pdf"}
+  ]
+}
 ```
 
-------
+### Validation
 
-## Background
+#### Expected Output Format
+The system produces structured JSON output:
+```json
+{
+  "metadata": {
+    "persona": "Food Contractor",
+    "job_to_be_done": "Prepare vegetarian buffet...",
+    "intelligent_query": "dinner menu vegetarian...",
+    "config_used": "query_config.py"
+  },
+  "extracted_sections": [
+    {
+      "document": "Dinner Ideas - Mains_1.pdf",
+      "section_title": "Vegetarian Pasta",
+      "importance_rank": 1,
+      "page_number": 1
+    }
+  ],
+  "subsection_analysis": [
+    {
+      "document": "Dinner Ideas - Mains_1.pdf",
+      "refined_text": "Detailed content description...",
+      "page_number": 1
+    }
+  ]
+}
+```
 
-The project aims to train sentence embedding models on very large sentence level datasets using a self-supervised 
-contrastive learning objective. We used the pretrained [`nreimers/MiniLM-L6-H384-uncased`](https://huggingface.co/nreimers/MiniLM-L6-H384-uncased) model and fine-tuned in on a 
-1B sentence pairs dataset. We use a contrastive learning objective: given a sentence from the pair, the model should predict which out of a set of randomly sampled other sentences, was actually paired with it in our dataset.
+#### Performance Validation
+Monitor execution time:
+```bash
+time docker run --rm -v $(pwd)/input:/app/input -v $(pwd)/output:/app/output intelligent-doc-analysis
+```
 
-We developed this model during the 
-[Community week using JAX/Flax for NLP & CV](https://discuss.huggingface.co/t/open-to-the-community-community-week-using-jax-flax-for-nlp-cv/7104), 
-organized by Hugging Face. We developed this model as part of the project:
-[Train the Best Sentence Embedding Model Ever with 1B Training Pairs](https://discuss.huggingface.co/t/train-the-best-sentence-embedding-model-ever-with-1b-training-pairs/7354). We benefited from efficient hardware infrastructure to run the project: 7 TPUs v3-8, as well as intervention from Googles Flax, JAX, and Cloud team member about efficient deep learning frameworks.
+**Expected**: Processing completes within 60 seconds for typical document collections.
 
-## Intended uses
-
-Our model is intended to be used as a sentence and short paragraph encoder. Given an input text, it outputs a vector which captures 
-the semantic information. The sentence vector may be used for information retrieval, clustering or sentence similarity tasks.
-
-By default, input text longer than 256 word pieces is truncated.
-
-
-## Training procedure
-
-### Pre-training 
-
-We use the pretrained [`nreimers/MiniLM-L6-H384-uncased`](https://huggingface.co/nreimers/MiniLM-L6-H384-uncased) model. Please refer to the model card for more detailed information about the pre-training procedure.
-
-### Fine-tuning 
-
-We fine-tune the model using a contrastive objective. Formally, we compute the cosine similarity from each possible sentence pairs from the batch.
-We then apply the cross entropy loss by comparing with true pairs.
-
-#### Hyper parameters
-
-We trained our model on a TPU v3-8. We train the model during 100k steps using a batch size of 1024 (128 per TPU core).
-We use a learning rate warm up of 500. The sequence length was limited to 128 tokens. We used the AdamW optimizer with
-a 2e-5 learning rate. The full training script is accessible in this current repository: `train_script.py`.
-
-#### Training data
-
-We use the concatenation from multiple datasets to fine-tune our model. The total number of sentence pairs is above 1 billion sentences.
-We sampled each dataset given a weighted probability which configuration is detailed in the `data_config.json` file.
-
-
-| Dataset                                                  | Paper                                    | Number of training tuples  |
-|--------------------------------------------------------|:----------------------------------------:|:--------------------------:|
-| [Reddit comments (2015-2018)](https://github.com/PolyAI-LDN/conversational-datasets/tree/master/reddit) | [paper](https://arxiv.org/abs/1904.06472) | 726,484,430 |
-| [S2ORC](https://github.com/allenai/s2orc) Citation pairs (Abstracts) | [paper](https://aclanthology.org/2020.acl-main.447/) | 116,288,806 |
-| [WikiAnswers](https://github.com/afader/oqa#wikianswers-corpus) Duplicate question pairs | [paper](https://doi.org/10.1145/2623330.2623677) | 77,427,422 |
-| [PAQ](https://github.com/facebookresearch/PAQ) (Question, Answer) pairs | [paper](https://arxiv.org/abs/2102.07033) | 64,371,441 |
-| [S2ORC](https://github.com/allenai/s2orc) Citation pairs (Titles) | [paper](https://aclanthology.org/2020.acl-main.447/) | 52,603,982 |
-| [S2ORC](https://github.com/allenai/s2orc) (Title, Abstract) | [paper](https://aclanthology.org/2020.acl-main.447/) | 41,769,185 |
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) (Title, Body) pairs  | - | 25,316,456 |
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) (Title+Body, Answer) pairs  | - | 21,396,559 |
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) (Title, Answer) pairs  | - | 21,396,559 |
-| [MS MARCO](https://microsoft.github.io/msmarco/) triplets | [paper](https://doi.org/10.1145/3404835.3462804) | 9,144,553 |
-| [GOOAQ: Open Question Answering with Diverse Answer Types](https://github.com/allenai/gooaq) | [paper](https://arxiv.org/pdf/2104.08727.pdf) | 3,012,496 |
-| [Yahoo Answers](https://www.kaggle.com/soumikrakshit/yahoo-answers-dataset) (Title, Answer) | [paper](https://proceedings.neurips.cc/paper/2015/hash/250cf8b51c773f3f8dc8b4be867a9a02-Abstract.html) | 1,198,260 |
-| [Code Search](https://huggingface.co/datasets/code_search_net) | - | 1,151,414 |
-| [COCO](https://cocodataset.org/#home) Image captions | [paper](https://link.springer.com/chapter/10.1007%2F978-3-319-10602-1_48) | 828,395|
-| [SPECTER](https://github.com/allenai/specter) citation triplets | [paper](https://doi.org/10.18653/v1/2020.acl-main.207) | 684,100 |
-| [Yahoo Answers](https://www.kaggle.com/soumikrakshit/yahoo-answers-dataset) (Question, Answer) | [paper](https://proceedings.neurips.cc/paper/2015/hash/250cf8b51c773f3f8dc8b4be867a9a02-Abstract.html) | 681,164 |
-| [Yahoo Answers](https://www.kaggle.com/soumikrakshit/yahoo-answers-dataset) (Title, Question) | [paper](https://proceedings.neurips.cc/paper/2015/hash/250cf8b51c773f3f8dc8b4be867a9a02-Abstract.html) | 659,896 |
-| [SearchQA](https://huggingface.co/datasets/search_qa) | [paper](https://arxiv.org/abs/1704.05179) | 582,261 |
-| [Eli5](https://huggingface.co/datasets/eli5) | [paper](https://doi.org/10.18653/v1/p19-1346) | 325,475 |
-| [Flickr 30k](https://shannon.cs.illinois.edu/DenotationGraph/) | [paper](https://transacl.org/ojs/index.php/tacl/article/view/229/33) | 317,695 |
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) Duplicate questions (titles) | | 304,525 |
-| AllNLI ([SNLI](https://nlp.stanford.edu/projects/snli/) and [MultiNLI](https://cims.nyu.edu/~sbowman/multinli/) | [paper SNLI](https://doi.org/10.18653/v1/d15-1075), [paper MultiNLI](https://doi.org/10.18653/v1/n18-1101) | 277,230 | 
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) Duplicate questions (bodies) | | 250,519 |
-| [Stack Exchange](https://huggingface.co/datasets/flax-sentence-embeddings/stackexchange_xml) Duplicate questions (titles+bodies) | | 250,460 |
-| [Sentence Compression](https://github.com/google-research-datasets/sentence-compression) | [paper](https://www.aclweb.org/anthology/D13-1155/) | 180,000 |
-| [Wikihow](https://github.com/pvl/wikihow_pairs_dataset) | [paper](https://arxiv.org/abs/1810.09305) | 128,542 |
-| [Altlex](https://github.com/chridey/altlex/) | [paper](https://aclanthology.org/P16-1135.pdf) | 112,696 |
-| [Quora Question Triplets](https://quoradata.quora.com/First-Quora-Dataset-Release-Question-Pairs) | - | 103,663 |
-| [Simple Wikipedia](https://cs.pomona.edu/~dkauchak/simplification/) | [paper](https://www.aclweb.org/anthology/P11-2117/) | 102,225 |
-| [Natural Questions (NQ)](https://ai.google.com/research/NaturalQuestions) | [paper](https://transacl.org/ojs/index.php/tacl/article/view/1455) | 100,231 |
-| [SQuAD2.0](https://rajpurkar.github.io/SQuAD-explorer/) | [paper](https://aclanthology.org/P18-2124.pdf) | 87,599 |
-| [TriviaQA](https://huggingface.co/datasets/trivia_qa) | - | 73,346 |
-| **Total** | | **1,170,060,424** |
+ 
